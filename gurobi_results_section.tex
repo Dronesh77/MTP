@@ -1,0 +1,134 @@
+\section{Results and Insights from the Gurobi Optimization Model}
+
+\subsection{Overview of the Exact Optimization Run}
+
+The final service-network design problem was solved using Gurobi as an exact mixed-integer linear programming (MILP) solver. Since the raw dataset contained 898 validated geocoded service points after outlier filtering, a spatial aggregation step was first applied to create a smaller number of representative demand nodes. This reduction was necessary because the local Gurobi license available during implementation was size-limited. After aggregation, the exact MILP was solved on 37 demand nodes and 30 candidate hub locations.
+
+The optimization completed successfully and returned an optimal solution. The main solver outputs are summarized in Table~\ref{tab:gurobi_solver_summary}.
+
+\begin{table}[h!]
+\centering
+\caption{Summary of the Gurobi optimization run}
+\label{tab:gurobi_solver_summary}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+Solver status & Optimal \\
+Objective value & 4,288,471.65 \\
+Best bound & 4,281,732.89 \\
+MIP gap & 0.16\% \\
+Selected hubs & 5 \\
+Assigned demand nodes & 37 \\
+\hline
+\end{tabular}
+\end{table}
+
+The very small optimality gap confirms that the reported solution is effectively exact for the aggregated network used in the model.
+
+\subsection{Explanation of the Files in the \texttt{gurobi\_outputs} Folder}
+
+The Gurobi results were written to a dedicated folder named \texttt{gurobi\_outputs}. Each file in this folder plays a different role in the interpretation of the solution.
+
+\begin{enumerate}
+    \item \textbf{\texttt{optimization\_summary.md}}: This file gives the overall solver summary, including objective value, best bound, MIP gap, number of selected hubs, and the key performance indicators of the chosen locations.
+    \item \textbf{\texttt{selected\_hubs.csv}}: This file contains the final hub locations selected by the exact MILP. It includes hub rank, district, service name, service category, total assigned load, average distance, average travel time, and capacity utilization.
+    \item \textbf{\texttt{hub\_assignments.csv}}: This file gives the detailed location-allocation result. It shows which aggregated demand node is assigned to which selected hub, together with the corresponding distance and traffic-adjusted travel time.
+    \item \textbf{\texttt{underserved\_districts.csv}}: This file identifies which districts remain uncovered by a selected hub in the exact solution. A value of 1 means that the district did not receive a selected hub and therefore contributed to the underserved-district penalty term in the objective.
+    \item \textbf{\texttt{district\_metrics.csv}}: This file contains the district-level indicators used to compute the expansion-priority score. It includes service density, repair share, category diversity, spatial dispersion, and the final expansion-priority rank.
+\end{enumerate}
+
+\subsection{Selected Hub Locations}
+
+The exact Gurobi solution selected five hub anchors, shown in Table~\ref{tab:gurobi_selected_hubs}.
+
+\begin{table}[h!]
+\centering
+\caption{Selected hubs from the Gurobi MILP solution}
+\label{tab:gurobi_selected_hubs}
+\begin{tabular}{|c|l|p{5.2cm}|l|c|c|}
+\hline
+\textbf{Rank} & \textbf{District} & \textbf{Selected Hub} & \textbf{Category} & \textbf{Assigned Points} & \textbf{Utilization} \\
+\hline
+1 & Murshidabad & Mahabani Filling Station, Sagardighi & Fuel Station & 4 & 0.333 \\
+2 & Murshidabad & SM Motors, Sargachi & Vehicle Repair & 13 & 0.753 \\
+3 & South 24 Parganas & Om Auto Petrol Pump, Budge Budge & Fuel Station & 6 & 0.573 \\
+4 & Paschim Medinipur & Sukhinder Singh & Other & 7 & 0.629 \\
+5 & Birbhum & Mahindra Service Center, Chakpara & Vehicle Repair & 7 & 0.576 \\
+\hline
+\end{tabular}
+\end{table}
+
+The solution is noteworthy because it does not simply place all hubs in the largest or most urban districts. Instead, the model distributes hubs across strategically important regions in order to balance district priority, service reach, traffic-adjusted travel burden, and facility capability.
+
+\subsection{Interpretation of the Selected Hubs}
+
+\textbf{Murshidabad as a dominant service anchor:} Two of the five selected hubs are located in Murshidabad. This is consistent with the district metrics, where Murshidabad had the highest expansion-priority score of 0.8237. The district is characterized by high fuel dependence, low repair share, and relatively weak category balance, making it a high-priority target for service expansion. One selected hub is a fuel-oriented station at Sagardighi, while the second is a vehicle-repair-oriented site at Sargachi. This combination suggests that the optimization found value in placing both access-oriented and repair-oriented capacity in the same broad region.
+
+\textbf{South 24 Parganas as a southern service gateway:} South 24 Parganas also received a selected hub, namely Om Auto Petrol Pump at Budge Budge. This district had the second-highest expansion-priority score of 0.8187, indicating high importance in the statewide service network. Its selected hub serves not only local nodes but also contributes to coverage for Howrah, Hooghly, and Nadia.
+
+\textbf{Paschim Medinipur as a western connector:} The Paschim Medinipur hub acts as a major western service anchor and serves demand from Jhargram, Purba Medinipur, and South 24 Parganas in addition to its own district. This indicates that the model viewed the western corridor as important for regional balancing and cross-district accessibility.
+
+\textbf{Birbhum as a repair-oriented central support point:} The selected Birbhum hub is a Mahindra service center, which is especially meaningful because repair-oriented facilities are structurally more valuable in a service network than pure fueling points. This hub serves Birbhum, Bankura, Purulia, and Paschim Burdwan, suggesting that it acts as a central maintenance-support cluster in the western-central part of the state.
+
+\subsection{Insights from \texttt{hub\_assignments.csv}}
+
+The \texttt{hub\_assignments.csv} file gives the exact location-allocation structure of the model. It reveals how the selected hubs jointly cover multiple districts instead of serving only their own administrative boundaries.
+
+The major assignment patterns are:
+\begin{itemize}
+    \item The Birbhum hub serves Bankura, Birbhum, Paschim Burdwan, and Purulia.
+    \item The Murshidabad fuel hub serves Birbhum and Murshidabad.
+    \item The Murshidabad repair hub serves Alipurduar, Dakshin Dinajpur, Darjeeling, Jalpaiguri, Kalimpong, Malda, and Uttar Dinajpur.
+    \item The Paschim Medinipur hub serves Hooghly, Jhargram, Paschim Medinipur, Purba Medinipur, and South 24 Parganas.
+    \item The South 24 Parganas hub serves Hooghly, Howrah, Nadia, and South 24 Parganas.
+\end{itemize}
+
+These results show that the model generated a \emph{regional coverage structure} rather than a purely district-wise one. That is an important planning insight: administrative boundaries alone do not determine optimal service-hub placement. Instead, hubs should be interpreted as regional anchors whose influence extends to nearby districts when traffic-adjusted travel costs remain acceptable.
+
+At the same time, the assignments also reveal a limitation of the current exact model: some northern districts such as Kalimpong and Darjeeling are assigned to Murshidabad-based repair infrastructure, which leads to very high travel-time estimates in the aggregated solution. This suggests that the current model is mathematically optimal under the chosen reduced candidate set and penalty structure, but it also indicates the need for future refinement using stronger regional equity constraints or a larger exact candidate set.
+
+\subsection{Insights from \texttt{underserved\_districts.csv}}
+
+The \texttt{underserved\_districts.csv} file identifies districts that did not receive a selected hub directly. In the final solution, the districts with \texttt{underserved\_binary = 0} are:
+\begin{itemize}
+    \item Murshidabad
+    \item South 24 Parganas
+    \item Paschim Medinipur
+    \item Birbhum
+\end{itemize}
+
+All other districts have \texttt{underserved\_binary = 1}, meaning they were covered indirectly through cross-district assignments but were not chosen as direct hub locations. This result should not be interpreted as failure; rather, it reflects the effect of the hub-count and budget constraints. The model was forced to concentrate investment in a small number of strategic nodes, and therefore some districts had to be served indirectly.
+
+However, districts such as Kalimpong, Malda, Nadia, Uttar Dinajpur, and Bankura still show relatively high expansion-priority values without receiving direct hubs. These districts are therefore strong candidates for future expansion if the planning authority allows more than five hubs or increases the available budget.
+
+\subsection{Insights from \texttt{district\_metrics.csv}}
+
+The \texttt{district\_metrics.csv} file explains why certain districts emerged as more critical than others. The top-ranked districts by expansion priority are:
+\begin{itemize}
+    \item Murshidabad: 0.8237
+    \item South 24 Parganas: 0.8187
+    \item Paschim Medinipur: 0.7621
+    \item Birbhum: 0.7581
+    \item Malda: 0.7166
+    \item Kalimpong: 0.7014
+    \item Nadia: 0.6928
+    \item Uttar Dinajpur: 0.6835
+\end{itemize}
+
+This ranking confirms that the exact optimization is broadly aligned with the spatial deficiency analysis. Four of the top-priority districts directly receive hubs in the final MILP solution. The remaining high-priority districts that do not receive hubs should be interpreted as next-stage expansion candidates.
+
+\subsection{Managerial and Planning Insights}
+
+The results suggest five important conclusions:
+\begin{enumerate}
+    \item \textbf{Service expansion should be regional, not purely local.} The exact assignments show that one hub can efficiently support multiple neighboring districts when traffic-adjusted accessibility is considered.
+    \item \textbf{Murshidabad and South 24 Parganas are priority investment zones.} Their high expansion-priority scores and direct selection in the MILP confirm their strategic importance.
+    \item \textbf{Repair-oriented hubs are structurally important.} Vehicle-repair hubs in Murshidabad and Birbhum play major roles in the selected network, indicating that maintenance support is more critical than simply increasing fuel access.
+    \item \textbf{Budget constraints strongly shape coverage equity.} Several high-priority districts remain indirectly served only because the model is restricted to five hubs and a fixed investment budget.
+    \item \textbf{The exact model is suitable for phased expansion planning.} The current five-hub solution can be interpreted as Phase I, while districts such as Malda, Kalimpong, Nadia, and Uttar Dinajpur may form the basis of Phase II expansion.
+\end{enumerate}
+
+\subsection{Conclusion of the Result Analysis}
+
+Overall, the Gurobi-based exact optimization provides a more rigorous decision-support result than descriptive mapping or heuristic allocation alone. The \texttt{gurobi\_outputs} folder collectively explains the complete decision process: district need is quantified in \texttt{district\_metrics.csv}, final hub choices are listed in \texttt{selected\_hubs.csv}, detailed regional allocations are captured in \texttt{hub\_assignments.csv}, and residual spatial gaps are reflected in \texttt{underserved\_districts.csv}. Together, these files provide a complete analytical basis for discussing optimal service-network expansion in West Bengal.

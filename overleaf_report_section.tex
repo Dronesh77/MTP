@@ -1,0 +1,301 @@
+\section{Problem Reformulation}
+
+The initial mid-term work was limited to Kolkata and primarily focused on plotting service-related locations on a map. After expanding the dataset to multiple districts of West Bengal, cleaning the records, and geocoding the service points using the Google Maps API, the scope of the work was reformulated into a statewide spatial decision-support problem. The revised problem is to identify spatial imbalance in automotive support infrastructure and recommend suitable locations for future integrated service hubs.
+
+The motivation for this reformulation comes from the fact that simple map visualization is not sufficient for planning. A district may have many service points overall, yet still remain underserved if repair facilities are scarce, if services are heavily clustered in one subregion, or if the service mix is not balanced across fuel, food, and repair support. Therefore, the present work moves beyond descriptive mapping and develops a data-driven analytical framework for infrastructure assessment and service expansion planning.
+
+\section{Objectives}
+
+The objectives of the study are as follows:
+\begin{enumerate}
+    \item To build a geocoded database of automotive support infrastructure across West Bengal using cleaned field data.
+    \item To classify the available facilities into meaningful service categories such as fuel stations, food/lodging points, vehicle repair facilities, and other supporting services.
+    \item To quantify the spatial imbalance of service infrastructure across districts.
+    \item To rank districts according to their priority for future service-network expansion.
+    \item To identify candidate locations for integrated service hubs using a spatial optimization approach.
+\end{enumerate}
+
+\section{Dataset Preparation}
+
+The source data was first collected in semi-structured form and later cleaned into CSV format. The cleaned records were geocoded using the Google Maps API to obtain latitude and longitude values for each service point. The final dataset contains 915 geocoded records distributed across 19 districts of West Bengal. The analysis pipeline also performs a basic geocode validation step and flags suspected outliers before running the optimization stage. In the present run, 17 records were identified as likely geocoding outliers, and 898 validated points were retained for spatial analysis.
+
+\section{Service Categorization}
+
+Since the service names are noisy and heterogeneous, rule-based semantic categorization was used to group the records into four broad categories:
+\begin{itemize}
+    \item \textbf{Fuel Station}
+    \item \textbf{Food/Lodging}
+    \item \textbf{Vehicle Repair}
+    \item \textbf{Other}
+\end{itemize}
+
+This categorization converts unstructured service labels into a form suitable for district-level comparison and service-network analysis.
+
+\section{Methodology}
+
+The methodology consists of five major stages:
+\begin{enumerate}
+    \item Data cleaning and standardization of service names and districts.
+    \item Geocoding of service locations using the Google Maps API.
+    \item Spatial exploratory analysis using the geocoded point set.
+    \item Construction of a district expansion-priority index.
+    \item Recommendation of candidate integrated service hubs through a weighted spatial optimization heuristic.
+\end{enumerate}
+
+For the spatial analysis, the Haversine formula was used to compute great-circle distances between service points. This enables realistic measurement of geographic separation between infrastructure locations.
+
+\section{Mathematical Formulation}
+
+\subsection{Sets and Indices}
+
+\begin{itemize}
+    \item $d \in D$ : set of districts
+    \item $i \in I$ : set of demand nodes derived from observed geocoded service points
+    \item $j \in J$ : set of candidate hub locations
+    \item $c \in C$ : set of inferred service categories
+    \item $k \in K$ : set of service types handled at an integrated hub
+\end{itemize}
+
+\subsection{Parameters}
+
+\begin{itemize}
+    \item $(lat_i, lon_i)$ : latitude and longitude of service point $i$
+    \item $g(i)$ : district of service point $i$
+    \item $cat(i)$ : category of service point $i$
+    \item $d_{ij}$ : Haversine distance between service point $i$ and candidate hub $j$
+    \item $w_i$ : relative demand importance of node $i$
+    \item $q_i$ : estimated demand volume associated with node $i$
+    \item $t_{ij}$ : effective travel time between node $i$ and hub $j$
+    \item $\tau_{ij}$ : traffic congestion multiplier between node $i$ and hub $j$
+    \item $R$ : maximum service coverage radius
+    \item $P$ : maximum number of new hubs to be selected
+    \item $F_j$ : fixed cost of establishing hub $j$
+    \item $B$ : total budget available for hub establishment
+    \item $U_j$ : maximum service capacity of hub $j$
+    \item $L_j$ : minimum viable utilization required if hub $j$ is opened
+    \item $\beta_k$ : service capability weight for service type $k$
+    \item $\lambda_1, \lambda_2, \lambda_3$ : weights assigned to distance, traffic delay, and underserved-area penalty
+\end{itemize}
+
+\subsection{District-Level Expansion Priority Model}
+
+For each district $d$, the following indicators are computed:
+\begin{itemize}
+    \item $N_d$ : total number of services in district $d$
+    \item $A_d$ : approximate spatial spread area of district $d$
+    \item $\rho_d = \frac{N_d}{A_d}$ : proxy service density
+    \item $r_d$ : share of vehicle repair facilities
+    \item $m_d$ : mean nearest-neighbor distance among service points
+    \item $h_d$ : normalized category diversity score
+\end{itemize}
+
+The deficiency of a district is assessed through four normalized components:
+\begin{itemize}
+    \item density gap
+    \item repair gap
+    \item dispersion gap
+    \item diversity gap
+\end{itemize}
+
+The overall expansion-priority score of district $d$ is defined as:
+
+\begin{equation}
+EPS_d = 0.35 \, DG_d + 0.25 \, RG_d + 0.20 \, SG_d + 0.20 \, VG_d
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $DG_d$ is the normalized density gap,
+    \item $RG_d$ is the normalized repair gap,
+    \item $SG_d$ is the normalized spatial dispersion score,
+    \item $VG_d$ is the normalized diversity gap.
+\end{itemize}
+
+Higher values of $EPS_d$ indicate greater need for service-network expansion.
+
+\subsection{Traffic-Aware Integrated Hub Location Model}
+
+Let
+\[
+x_j =
+\begin{cases}
+1, & \text{if candidate hub } j \text{ is selected,} \\
+0, & \text{otherwise.}
+\end{cases}
+\]
+
+Also let
+\[
+y_{ij} =
+\begin{cases}
+    1, & \text{if service point } i \text{ is assigned to hub } j, \\
+    0, & \text{otherwise.}
+\end{cases}
+\]
+
+Let
+\[
+s_{jk} =
+\begin{cases}
+1, & \text{if service type } k \text{ is activated at hub } j, \\
+0, & \text{otherwise.}
+\end{cases}
+\]
+
+The traffic-adjusted travel time is modeled as:
+
+\begin{equation}
+t_{ij} = \alpha d_{ij} \tau_{ij}
+\end{equation}
+
+where $\alpha$ is a distance-to-time conversion factor and $\tau_{ij} \geq 1$ captures the delay effect of traffic congestion. A larger value of $\tau_{ij}$ indicates poorer accessibility due to traffic bottlenecks, urban congestion, road condition, or terrain difficulty.
+
+To strengthen the formulation, a multi-objective planning model is proposed. The objective is to minimize weighted access burden, traffic-adjusted delay, and underserved-area penalty:
+
+\begin{equation}
+\min Z =
+\lambda_1 \sum_{i \in I} \sum_{j \in J} w_i d_{ij} y_{ij}
++
+\lambda_2 \sum_{i \in I} \sum_{j \in J} w_i t_{ij} y_{ij}
++
+\lambda_3 \sum_{d \in D} EPS_d \left( 1 - \sum_{j \in J_d} x_j \right)
+\end{equation}
+
+subject to:
+
+\begin{equation}
+\sum_{j \in J} y_{ij} = 1 \qquad \forall i \in I
+\end{equation}
+
+\begin{equation}
+y_{ij} \leq x_j \qquad \forall i \in I, \forall j \in J
+\end{equation}
+
+\begin{equation}
+\sum_{j \in J} x_j \leq P
+\end{equation}
+
+\begin{equation}
+\sum_{j \in J} F_j x_j \leq B
+\end{equation}
+
+\begin{equation}
+\sum_{i \in I} q_i y_{ij} \leq U_j x_j \qquad \forall j \in J
+\end{equation}
+
+\begin{equation}
+\sum_{i \in I} q_i y_{ij} \geq L_j x_j \qquad \forall j \in J
+\end{equation}
+
+\begin{equation}
+\sum_{k \in K} \beta_k s_{jk} \geq \eta x_j \qquad \forall j \in J
+\end{equation}
+
+\begin{equation}
+y_{ij} = 0 \qquad \text{if } d_{ij} > R
+\end{equation}
+
+\begin{equation}
+x_j \in \{0,1\}, \qquad y_{ij} \in \{0,1\}, \qquad s_{jk} \in \{0,1\}
+\end{equation}
+
+The third term in the objective penalizes the situation where high-priority districts do not receive a selected hub. Thus, the model does not simply favor dense or central regions, but explicitly pushes new investment toward underserved districts.
+
+\subsection{Interpretation of the Traffic Factor}
+
+The traffic factor $\tau_{ij}$ is introduced to make the model more realistic. In actual service planning, two locations with similar straight-line distance may have very different accessibility because of traffic congestion, poor road quality, river crossings, hilly terrain, or urban bottlenecks. Therefore, traffic-adjusted accessibility is often more relevant than pure geographic distance.
+
+In a future full-scale implementation, $\tau_{ij}$ can be derived from:
+\begin{itemize}
+    \item Google Maps travel time API,
+    \item district-level average traffic intensity,
+    \item road hierarchy and highway connectivity,
+    \item terrain and travel impedance factors.
+\end{itemize}
+
+\subsection{Why This Formulation Is Stronger}
+
+Compared with a simple location-selection model, the above formulation is more suitable for a master's-level project because it includes:
+\begin{itemize}
+    \item district-level infrastructure deficiency through $EPS_d$,
+    \item demand-weighted allocation,
+    \item traffic-adjusted travel time,
+    \item hub capacity and minimum utilization,
+    \item budget constraints,
+    \item service capability activation across multiple service types.
+\end{itemize}
+
+\section{Results and Discussion}
+
+\subsection{Overall Analysis Summary}
+
+The statewide analysis was performed on 915 geocoded service points from 19 districts of West Bengal. After geocode validation, 898 points were retained for optimization and district ranking. Among all inferred categories, fuel stations formed the dominant category in the database.
+
+\subsection{Highest-Priority Districts for Expansion}
+
+Based on the composite expansion-priority index, the five most critical districts for future service-network strengthening are listed in Table~\ref{tab:priority_districts}.
+
+\begin{table}[h!]
+\centering
+\caption{Highest-priority districts for service-network expansion}
+\label{tab:priority_districts}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{District} & \textbf{Priority Score} & \textbf{Total Services} & \textbf{Repair Units} & \textbf{Density} & \textbf{Mean NN Distance (km)} \\
+\hline
+Murshidabad & 0.8237 & 69 & 6 & 12.2596 & 2.0432 \\
+South 24 Parganas & 0.8187 & 61 & 8 & 5.8926 & 2.1086 \\
+Paschim Medinipur & 0.7621 & 18 & 4 & 16.2494 & 4.0191 \\
+Birbhum & 0.7581 & 43 & 5 & 12.5644 & 2.0383 \\
+Malda & 0.7166 & 23 & 4 & 11.1041 & 3.6646 \\
+\hline
+\end{tabular}
+\end{table}
+
+These districts emerged as high-priority areas because of a combination of low service balance, insufficient repair share, and relatively weak spatial distribution compared with better-served districts.
+
+\subsection{Recommended Integrated Service Hub Anchors}
+
+Using the weighted spatial recommendation model, five candidate hub anchors were identified from the observed service network. The recommended locations are shown in Table~\ref{tab:recommended_hubs}.
+
+\begin{table}[h!]
+\centering
+\caption{Recommended integrated service hub anchors}
+\label{tab:recommended_hubs}
+\begin{tabular}{|c|l|p{5.7cm}|l|c|}
+\hline
+\textbf{Rank} & \textbf{District} & \textbf{Candidate Location} & \textbf{Category} & \textbf{Covered Points} \\
+\hline
+1 & Bankura & Majumder Auto Mobiles, Netaji More & Vehicle Repair & 42 \\
+2 & Kalimpong & Mukul Garage, Teesta Bazar, NH10 & Vehicle Repair & 112 \\
+3 & South 24 Parganas & K C Paul Service Station, Budge Budge & Fuel Station & 185 \\
+4 & Murshidabad & Gouranga Fuel House, Raghunathganj & Fuel Station & 69 \\
+5 & Bankura & Maa Tara Hindu Hotel / Saluni Petrol Pump corridor & Fuel Station & 86 \\
+\hline
+\end{tabular}
+\end{table}
+
+These recommendations indicate that future integrated service development should not be restricted to metropolitan Kolkata alone. Instead, districts such as Murshidabad, South 24 Parganas, Bankura, and Kalimpong present meaningful opportunities for statewide service-network strengthening.
+
+\subsection{Interpretation}
+
+The results show that infrastructure planning should be based not only on the number of services already present, but also on their spatial spread and functional composition. Districts with strong fuel presence but weak repair capacity may still face service deficiencies for vehicle users. Likewise, districts with geographically scattered services may require hub-based strengthening even if their total service count is moderate.
+
+The proposed framework therefore provides a more practical planning perspective than simple point mapping. It converts geocoded field data into district-level evidence, expansion priorities, and actionable hub recommendations.
+
+\section{Conclusion}
+
+This study demonstrates that a statewide geospatial analysis of automotive support infrastructure can provide stronger and more actionable insights than a city-level descriptive approach. By combining cleaned field data, geocoding, semantic categorization, spatial metrics, and a weighted hub recommendation model, the work establishes a reproducible framework for service-network planning in West Bengal.
+
+The methodology is suitable for further extension with vehicle registration data, traffic flow, road-network travel time, and demand forecasting. Such additions can convert the present model into a full-scale decision-support system for automotive after-sales and roadside support planning.
+
+\section{Future Scope}
+
+The present work can be extended in the following directions:
+\begin{enumerate}
+    \item Integration of road-network travel time instead of straight-line distance.
+    \item Inclusion of district-wise vehicle population and traffic intensity.
+    \item Use of machine learning methods for service-demand prediction.
+    \item Multi-objective optimization including cost, accessibility, and equity.
+    \item Development of an interactive decision-support dashboard for planners and firms.
+\end{enumerate}

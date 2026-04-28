@@ -1,0 +1,191 @@
+\section{Results, Visual Analysis, and Managerial Insights}
+
+\subsection{Overview of the Exact Gurobi Solution}
+
+The final optimization model was solved using Gurobi as an exact mixed-integer linear programming solver on an aggregated statewide network. After filtering geocoding outliers, the original validated dataset was reduced to 37 aggregated demand nodes for exact optimization, while 30 candidate hub locations were retained in the final decision set. The optimization terminated successfully with an optimal solution.
+
+The key solver outputs are summarized below:
+\begin{itemize}
+    \item Objective value: 4,288,471.65
+    \item Best bound: 4,281,732.89
+    \item MIP gap: 0.16\%
+    \item Number of selected hubs: 5
+    \item Number of assigned aggregated demand nodes: 37
+\end{itemize}
+
+The low optimality gap indicates that the reported solution is effectively exact for the aggregated problem instance used in the model.
+
+\subsection{Recommended Order of Figures in the Report}
+
+The following figures should be inserted in the results chapter in this order:
+\begin{enumerate}
+    \item \textbf{Selected hub map}: \texttt{selected\_hubs\_map.html}
+    \item \textbf{Assignment map}: \texttt{assignment\_map.html}
+    \item \textbf{Priority versus direct selection chart}: \texttt{priority\_vs\_selection.html}
+    \item \textbf{Hub capacity utilization chart}: \texttt{hub\_capacity\_utilization.html}
+    \item \textbf{Distance and traffic-adjusted travel time chart}: \texttt{distance\_and\_travel\_time\_by\_hub.html}
+    \item \textbf{Underserved district chart}: \texttt{underserved\_priority\_chart.html}
+    \item \textbf{District-to-hub Sankey diagram}: \texttt{district\_to\_hub\_sankey.html}
+\end{enumerate}
+
+If static image files are not available directly, screenshots may be taken from the HTML outputs and inserted into Overleaf as figures.
+
+\subsection{Spatial Distribution of Selected Hubs}
+
+Insert the diagram \textbf{\texttt{selected\_hubs\_map.html}} here.
+
+\begin{figure}[h!]
+\centering
+% Insert image generated from: gurobi_outputs/plots/selected_hubs_map.html
+% Example:
+% \includegraphics[width=\textwidth]{figures/selected_hubs_map.png}
+\caption{Spatial distribution of the selected service hubs obtained from the exact Gurobi optimization model.}
+\label{fig:gurobi_selected_hubs_map}
+\end{figure}
+
+Figure~\ref{fig:gurobi_selected_hubs_map} shows the final hub locations selected by the exact optimization model. The solution places five hubs in Murshidabad, South 24 Parganas, Paschim Medinipur, and Birbhum. Notably, Murshidabad receives two hubs, which is consistent with its position as the highest-priority district in the statewide deficiency ranking. The spatial pattern confirms that the model is not simply choosing metropolitan concentration points; rather, it is attempting to distribute capacity across strategically important regions of West Bengal.
+
+This figure is important because it provides the first visual confirmation that the exact optimization model captures statewide service needs instead of reproducing a Kolkata-centered pattern. It also highlights the role of western, southern, and northern corridors in hub placement.
+
+\subsection{Demand Allocation to the Selected Hubs}
+
+Insert the diagram \textbf{\texttt{assignment\_map.html}} here.
+
+\begin{figure}[h!]
+\centering
+% Insert image generated from: gurobi_outputs/plots/assignment_map.html
+% Example:
+% \includegraphics[width=\textwidth]{figures/assignment_map.png}
+\caption{Assignment of aggregated demand nodes to the selected hubs in the exact Gurobi solution.}
+\label{fig:gurobi_assignment_map}
+\end{figure}
+
+Figure~\ref{fig:gurobi_assignment_map} shows how the aggregated demand nodes are assigned to the chosen hubs. This is one of the most important result figures because it explains the operational meaning of the exact location-allocation model. The selected hubs do not serve only their own districts; instead, they act as regional anchors that attract demand from surrounding districts when traffic-adjusted accessibility and capacity constraints are taken into account.
+
+The map reveals several important coverage structures:
+\begin{itemize}
+    \item The Birbhum hub serves Bankura, Birbhum, Paschim Burdwan, and Purulia.
+    \item One Murshidabad hub serves Birbhum and Murshidabad.
+    \item The Murshidabad repair-oriented hub serves a wider northern belt including Alipurduar, Dakshin Dinajpur, Darjeeling, Jalpaiguri, Kalimpong, Malda, and Uttar Dinajpur.
+    \item The Paschim Medinipur hub serves Hooghly, Jhargram, Paschim Medinipur, Purba Medinipur, and South 24 Parganas.
+    \item The South 24 Parganas hub serves Hooghly, Howrah, Nadia, and South 24 Parganas.
+\end{itemize}
+
+The main insight from this figure is that the optimized network is regional rather than purely administrative. Cross-district service allocation emerges naturally when the objective minimizes weighted distance and traffic-adjusted travel burden. This strengthens the argument that service planning should not be based only on district boundaries.
+
+\subsection{District Priority Versus Direct Hub Selection}
+
+Insert the diagram \textbf{\texttt{priority\_vs\_selection.html}} here.
+
+\begin{figure}[h!]
+\centering
+% Insert image generated from: gurobi_outputs/plots/priority_vs_selection.html
+% Example:
+% \includegraphics[width=\textwidth]{figures/priority_vs_selection.png}
+\caption{Comparison of district expansion-priority scores with direct hub selection in the exact optimization model.}
+\label{fig:gurobi_priority_selection}
+\end{figure}
+
+Figure~\ref{fig:gurobi_priority_selection} compares district expansion-priority scores with the exact hub selection decision. This figure is useful because it links the spatial deficiency analysis with the final optimization output. Murshidabad, South 24 Parganas, Paschim Medinipur, and Birbhum, which were among the highest-priority districts, receive direct hubs in the final solution. This indicates strong consistency between the exploratory spatial analysis and the exact optimization result.
+
+At the same time, some high-priority districts such as Malda, Kalimpong, Nadia, and Uttar Dinajpur do not receive direct hubs. This does not mean they are unimportant. Rather, it shows that under the existing hub-count and budget restrictions, the model prefers to serve them through regional assignments from nearby strategic hubs. This figure should therefore be used to explain the trade-off between ideal spatial equity and limited infrastructure investment capacity.
+
+\subsection{Capacity Utilization of the Selected Hubs}
+
+Insert the diagram \textbf{\texttt{hub\_capacity\_utilization.html}} here.
+
+\begin{figure}[h!]
+\centering
+% Insert image generated from: gurobi_outputs/plots/hub_capacity_utilization.html
+% Example:
+% \includegraphics[width=\textwidth]{figures/hub_capacity_utilization.png}
+\caption{Capacity utilization levels of the selected hubs in the exact Gurobi solution.}
+\label{fig:gurobi_utilization}
+\end{figure}
+
+Figure~\ref{fig:gurobi_utilization} shows the degree to which each selected hub is utilized relative to its available capacity. This figure is important because it demonstrates that the chosen hubs are not merely feasible in a binary sense, but also operationally meaningful.
+
+The utilization values are all moderate to high, indicating that the selected hubs are neither severely underused nor unrealistically overloaded under the aggregated model. The highest utilization appears at the Murshidabad repair hub, which suggests that repair-oriented infrastructure is structurally valuable in the statewide network. The Birbhum and Paschim Medinipur hubs also show balanced usage, supporting their role as regionally important support nodes.
+
+This figure provides evidence that the optimization did not produce a wasteful solution. Instead, it selected hubs that absorb meaningful service load while satisfying capacity restrictions.
+
+\subsection{Distance and Traffic-Adjusted Travel Time Performance}
+
+Insert the diagram \textbf{\texttt{distance\_and\_travel\_time\_by\_hub.html}} here.
+
+\begin{figure}[h!]
+\centering
+% Insert image generated from: gurobi_outputs/plots/distance_and_travel_time_by_hub.html
+% Example:
+% \includegraphics[width=\textwidth]{figures/distance_and_travel_time_by_hub.png}
+\caption{Average assignment distance and traffic-adjusted travel time associated with each selected hub.}
+\label{fig:gurobi_distance_travel}
+\end{figure}
+
+Figure~\ref{fig:gurobi_distance_travel} directly reflects the traffic-aware nature of the model. It compares two linked but distinct performance indicators: average assignment distance and average traffic-adjusted travel time.
+
+This figure is especially valuable because it shows that minimizing straight-line distance alone would not capture the full accessibility challenge. Some hubs may have moderate average distance but high effective travel time because of congestion, difficult terrain, or long regional coverage patterns. In the present solution, the Murshidabad repair hub shows particularly high average travel time, indicating that it supports a large northern coverage belt under the current five-hub budgeted solution.
+
+This figure should be discussed carefully in the report. It reveals both a strength and a limitation of the current exact model:
+\begin{itemize}
+    \item \textbf{Strength:} the model explicitly accounts for traffic-adjusted accessibility rather than simple Euclidean coverage.
+    \item \textbf{Limitation:} some far northern assignments still remain because the number of hubs is restricted and the candidate set is reduced for exact solvability.
+\end{itemize}
+
+\subsection{Underserved Districts and Residual Gaps}
+
+Insert the diagram \textbf{\texttt{underserved\_priority\_chart.html}} here.
+
+\begin{figure}[h!]
+\centering
+% Insert image generated from: gurobi_outputs/plots/underserved_priority_chart.html
+% Example:
+% \includegraphics[width=\textwidth]{figures/underserved_priority_chart.png}
+\caption{District expansion-priority scores grouped by whether they receive a direct hub in the exact optimization model.}
+\label{fig:gurobi_underserved}
+\end{figure}
+
+Figure~\ref{fig:gurobi_underserved} shows the residual service gap after exact optimization. Districts with a direct hub are separated from districts that remain indirectly served. This figure is highly useful for discussing the planning implications of the model.
+
+The figure indicates that although the most critical districts are largely prioritized, not every high-priority district receives direct infrastructure in the first-stage optimized solution. Districts such as Kalimpong, Malda, Nadia, Bankura, and Uttar Dinajpur remain strong candidates for future expansion. Therefore, the current exact result should be interpreted as a \textbf{Phase I service deployment plan}, while the remaining high-priority but indirectly served districts define the \textbf{Phase II expansion frontier}.
+
+\subsection{District-to-Hub Service Flow Structure}
+
+Insert the diagram \textbf{\texttt{district\_to\_hub\_sankey.html}} here.
+
+\begin{figure}[h!]
+\centering
+% Insert image generated from: gurobi_outputs/plots/district_to_hub_sankey.html
+% Example:
+% \includegraphics[width=\textwidth]{figures/district_to_hub_sankey.png}
+\caption{District-to-hub assignment flows under the exact Gurobi location-allocation solution.}
+\label{fig:gurobi_sankey}
+\end{figure}
+
+Figure~\ref{fig:gurobi_sankey} provides a compact visual summary of how service demand flows from districts to the chosen hubs. This diagram is especially useful for presentation and viva discussion because it makes the regional allocation logic immediately visible. Instead of reading rows from a table, the reader can quickly identify which hubs attract service load from multiple districts.
+
+The Sankey representation reinforces the main operational insight of the exact model: the optimized service network behaves as a set of regional support corridors rather than isolated district-specific facilities. This is a strong argument in favor of statewide integrated service planning.
+
+\subsection{How to Discuss the Supporting Data Files}
+
+In addition to the figures, the following data files from the \texttt{gurobi\_outputs} folder should be referenced in the text:
+\begin{itemize}
+    \item \textbf{\texttt{selected\_hubs.csv}}: use this to cite the final chosen hub locations, utilization levels, and average service burden.
+    \item \textbf{\texttt{hub\_assignments.csv}}: use this to explain cross-district assignments and long-distance regional service behavior.
+    \item \textbf{\texttt{underserved\_districts.csv}}: use this to discuss which districts remain indirectly served after the first-stage optimal deployment.
+    \item \textbf{\texttt{district\_metrics.csv}}: use this to connect the exact optimization decisions back to the expansion-priority analysis.
+    \item \textbf{\texttt{optimization\_summary.md}}: use this to report solver performance, objective value, MIP gap, and number of selected hubs.
+\end{itemize}
+
+\subsection{Overall Result Interpretation}
+
+Taken together, the exact Gurobi results suggest the following broad conclusions:
+\begin{enumerate}
+    \item The most strategic investment zones are Murshidabad, South 24 Parganas, Paschim Medinipur, and Birbhum.
+    \item Repair-oriented hubs play a disproportionately important role in supporting the wider network.
+    \item Cross-district assignment is essential for efficient statewide coverage.
+    \item Traffic-adjusted accessibility reveals hidden service burdens that would be missed by distance-only planning.
+    \item The current solution is best interpreted as a budget-constrained first-stage statewide deployment plan.
+\end{enumerate}
+
+Overall, the figures and result files collectively show that the Gurobi model provides a rigorous and interpretable decision-support framework for automotive service-network planning in West Bengal.

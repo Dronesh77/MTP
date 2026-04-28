@@ -1,0 +1,134 @@
+\section{Data Cleaning and Processing}
+
+\subsection{Raw Data Collection}
+
+The initial dataset was collected from semi-structured records containing roadside service information across multiple districts of West Bengal. The raw records included names of petrol pumps, dhabas or hotels, garages, workshops, and other service facilities. Since the source material was not available in a directly analyzable tabular format, the first step of the study involved extracting and converting the information into a structured CSV dataset.
+
+At this stage, the data contained several quality issues such as:
+\begin{itemize}
+    \item inconsistent naming formats,
+    \item merged or incomplete address fields,
+    \item spelling variations,
+    \item presence of contact numbers inside service names,
+    \item missing category labels,
+    \item non-uniform district naming.
+\end{itemize}
+
+Therefore, a systematic cleaning and preprocessing pipeline was required before performing geospatial analysis and optimization.
+
+\subsection{Data Cleaning Objectives}
+
+The main objectives of the cleaning stage were:
+\begin{enumerate}
+    \item to convert the raw extracted data into a structured tabular format,
+    \item to standardize district names and service labels,
+    \item to remove noise and irrelevant characters,
+    \item to create meaningful location strings for geocoding,
+    \item to generate a reliable location-based dataset for further spatial modeling.
+\end{enumerate}
+
+\subsection{Preprocessing and Transformation Steps}
+
+The preprocessing pipeline consisted of the following major steps:
+
+\begin{enumerate}
+    \item \textbf{Conversion to CSV format:} The extracted service records were arranged into structured columns such as serial number, district, service name, and address-related information.
+
+    \item \textbf{Text normalization:} Service names were cleaned to remove unnecessary punctuation, repeated spaces, special characters, and formatting inconsistencies. This step helped improve both readability and geocoding accuracy.
+
+    \item \textbf{District standardization:} District names were normalized so that all records followed a consistent naming convention. For example, abbreviated entries and spelling variations were converted into standard district names.
+
+    \item \textbf{Construction of geocoding input strings:} Since the original data often contained incomplete or noisy address descriptions, a refined location string was created for each service point. The location string generally combined:
+    \begin{itemize}
+        \item service name,
+        \item inferred service type,
+        \item district name,
+        \item state name,
+        \item country name.
+    \end{itemize}
+
+    \item \textbf{Service categorization:} Records were grouped into broad categories such as fuel stations, food/lodging facilities, vehicle repair units, and other roadside services. This step was useful both for cleaning and for later analytical interpretation.
+
+    \item \textbf{Duplicate and error handling:} Repeated records and clearly inconsistent entries were reviewed. In addition, potential geocoding errors were later checked using district-level spatial validation.
+\end{enumerate}
+
+\subsection{Before and After Transformation}
+
+Insert the \textbf{data before cleaning} image here.
+
+\begin{figure}[h!]
+\centering
+% Example:
+% \includegraphics[width=\textwidth]{figures/data_before_cleaning.png}
+\caption{Sample view of the raw extracted dataset before cleaning and transformation.}
+\label{fig:data_before_cleaning}
+\end{figure}
+
+Figure~\ref{fig:data_before_cleaning} should show the original form of the extracted data, where inconsistencies in naming, formatting, and field structure make direct geospatial analysis difficult.
+
+Insert the \textbf{data after cleaning} image here.
+
+\begin{figure}[h!]
+\centering
+% Example:
+% \includegraphics[width=\textwidth]{figures/data_after_cleaning.png}
+\caption{Structured dataset after cleaning, normalization, and preprocessing.}
+\label{fig:data_after_cleaning}
+\end{figure}
+
+Figure~\ref{fig:data_after_cleaning} should present the cleaned and structured version of the dataset. The transformation from the raw form to the cleaned CSV form is essential because the later stages of geocoding, mapping, and optimization depend on consistent tabular inputs.
+
+\subsection{Generation of Latitude and Longitude}
+
+After cleaning the dataset, the next step was to convert the service records into geographic coordinates. This was done through a geocoding process using the Google Maps Geocoding API.
+
+For each cleaned service record, a full address string was generated in the following general format:
+\[
+\texttt{Service Name, Service Type, District, West Bengal, India}
+\]
+
+This enriched address string was used as input to the geocoding API. The purpose of including both the district and the state was to reduce ambiguity and improve the correctness of the returned location.
+
+The geocoding workflow followed these steps:
+\begin{enumerate}
+    \item Read the cleaned CSV file containing service information.
+    \item Construct a refined address string for every service record.
+    \item Send the address string to the Google Maps Geocoding API.
+    \item Extract the returned latitude and longitude values from the API response.
+    \item Store the coordinates in new columns in the output CSV file.
+    \item Drop records for which valid coordinates could not be obtained.
+\end{enumerate}
+
+The final result of this stage was a geocoded dataset in which each service point was associated with a pair of spatial coordinates:
+\begin{itemize}
+    \item \textbf{Latitude}: north-south geographic position
+    \item \textbf{Longitude}: east-west geographic position
+\end{itemize}
+
+These coordinates formed the basis of all subsequent tasks, including map visualization, hotspot identification, district comparison, and optimization-based hub selection.
+
+\subsection{Spatial Validation of Geocoded Points}
+
+Although the Google Maps API provides high-quality geocoding results, not every returned point is automatically reliable for research use. Some noisy service names may lead to incorrect matches outside the intended district. Therefore, a validation step was introduced after geocoding.
+
+In the validation stage:
+\begin{itemize}
+    \item district-wise spatial spread was examined,
+    \item extreme outlier points were identified,
+    \item suspicious coordinate matches were flagged for exclusion from optimization analysis.
+\end{itemize}
+
+This additional step improved the reliability of the final location dataset and ensured that later optimization results were not distorted by incorrect geographic matches.
+
+\subsection{Outcome of the Cleaning and Processing Stage}
+
+The outcome of this stage was a structured and geocoded dataset suitable for quantitative analysis. More specifically, the preprocessing pipeline produced:
+\begin{itemize}
+    \item a cleaned CSV dataset,
+    \item standardized service and district labels,
+    \item inferred service categories,
+    \item latitude and longitude for each valid service point,
+    \item a validated spatial dataset for statewide optimization and mapping.
+\end{itemize}
+
+This stage is a critical part of the overall methodology because the quality of the final optimization and visualization results depends directly on the quality of the cleaned and geocoded input data.
