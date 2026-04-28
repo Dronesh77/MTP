@@ -37,7 +37,7 @@ df["full_address"] = df.apply(enhance_address, axis=1)
 # ==============================
 # 4. Google Maps API
 # ==============================
-API_KEY = "AIzaSyATr31EPdD0VSVf0Gs41O9y0yEPUrUsqqU"  # ⚠️ replace this
+API_KEY = os.getenv("GOOGLE_MAP_API_KEY")  
 
 def get_lat_lng(address):
     url = "https://maps.googleapis.com/maps/api/geocode/json"
